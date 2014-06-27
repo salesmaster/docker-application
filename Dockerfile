@@ -99,10 +99,10 @@ RUN mkdir -p /usr/local/perlbrew /root
 ENV PERLBREW_ROOT /usr/local/perlbrew
 ENV PERLBREW_HOME /root/.perlbrew
 ENV PERLBREW_PATH /usr/local/perlbrew/bin
+ENV PATH /usr/local/perlbrew/bin:$PATH
 RUN curl -kL http://install.perlbrew.pl | bash &&\
     perlbrew install-cpanm &&\
     perlbrew info
-ENV PATH /usr/local/perlbrew/bin:$PATH
 
 # phantomjs
 ENV PHANTOMJS_VERSION 1.9.7

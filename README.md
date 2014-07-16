@@ -15,6 +15,8 @@ Base container built off Debian wheezy, featuring:
 * redis
 * solr
 * postgres
+ * repmgr
+ * wal-e
 * nodejs
 * chruby
 * ruby-install

@@ -8,7 +8,8 @@ ENV DEBIAN_BASE_PACKAGES build-essential autoconf locales ca-certificates \
       libyaml-dev  libxml2-dev libssl-dev libreadline6 libreadline6-dev zlib1g zlib1g-dev \
       libevent-dev libsqlite3-dev libxslt1-dev libxml2-dev libssl-dev libfontconfig1-dev \
       bison openssl python-software-properties software-properties-common lsb-release lsb-core \
-      curl wget tmux vim git default-jre runit chrpath nginx xvfb iceweasel openssh-server
+      curl wget tmux vim git default-jre runit chrpath nginx xvfb iceweasel openssh-server daemontools \
+      lzop pv python-setuptools python-all-dev
 
 RUN apt-get update && apt-get upgrade --assume-yes && apt-get dist-upgrade --assume-yes
 RUN apt-get install --assume-yes $DEBIAN_BASE_PACKAGES || apt-get update --fix-missing
@@ -27,6 +28,7 @@ RUN chmod 0755 /var/run/sshd
 
 # Base auth details.. should be overridden by sub-container
 RUN echo 'root:lkJh98.443g8yFCHHcppic-9' | chpasswd
+ADD ./files/docker-debian-wheezy-base_id_rsa /root/.ssh/docker-debian-wheezy-base_id_rsa
 ADD ./files/docker-debian-wheezy-base_id_rsa.pub /root/.ssh/docker-debian-wheezy-base_id_rsa.pub
 RUN cat /root/.ssh/docker-debian-wheezy-base_id_rsa.pub > /root/.ssh/authorized_keys
 
@@ -69,13 +71,21 @@ RUN wget -O solr.tar.gz http://archive.apache.org/dist/lucene/solr/$SOLR_VERSION
     mkdir -p /var/lib/solr/data/index /var/lib/solr /var/run/solr /var/log/solr &&\
     chown -R solr /var/lib/solr /var/run/solr /var/log/solr /etc/solr
 
-# postgres
+# postgres and repmgr
 ENV POSTGRES_VERSION 9.3
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" > /etc/apt/sources.list.d/pgdg.list &&\
     apt-get update &&\
     apt-get install -y --force-yes \
-        postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION postgresql-contrib-$POSTGRES_VERSION libpq-dev &&\
+        postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION postgresql-contrib-$POSTGRES_VERSION libpq-dev \
+        postgresql-$POSTGRES_VERSION-repmgr &&\
     /etc/init.d/postgresql stop
+
+# install wal-e (pg to s3)
+RUN easy_install pip &&\
+    easy_install --upgrade pip &&\
+    pip install wal-e &&\
+    easy_install --upgrade wal-e &&\
+    easy_install boto
 
 # chruby
 ENV CHRUBY_VERSION 0.3.8

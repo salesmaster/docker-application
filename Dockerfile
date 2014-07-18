@@ -132,6 +132,7 @@ ENV PATH /opt/node-v$NODEJS_VERSION-linux-x64/bin:$PATH
 RUN su - postgres -c "openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=UK/ST=Denial/L=Springfield/O=Dis/CN=salesmaster.co.uk" -keyout /var/lib/postgresql/sm-pg.key  -out /var/lib/postgresql/sm-pg.crt" &&\
     echo "ssl_cert_file = '/var/lib/postgresql/sm-pg.crt' \n" \
       "ssl_key_file = '/var/lib/postgresql/sm-pg.key' \n" \
+      "listen_addresses = '*' \n" \
       "\n" >> /etc/postgresql/$POSTGRES_VERSION/main/postgresql.conf &&\
     chmod og-rwx /var/lib/postgresql/sm-pg.key
 
@@ -147,7 +148,7 @@ RUN \
     \
     mkdir -p /etc/service/postgres &&\
     echo "#!/bin/sh \n" \
-      "exec chpst -u postgres -- /usr/lib/postgresql/$POSTGRES_VERSION/bin/postgres -D /var/lib/postgresql/$POSTGRES_VERSION/main -c config_file=/etc/postgresql/$POSTGRES_VERSION/main/postgresql.conf \n" \
+      "exec chpst -u postgres -- /usr/lib/postgresql/$POSTGRES_VERSION/bin/postgres -c config_file=/etc/postgresql/$POSTGRES_VERSION/main/postgresql.conf \n" \
       "\n" > /etc/service/postgres/run &&\
     \
     mkdir -p /etc/service/memcached &&\

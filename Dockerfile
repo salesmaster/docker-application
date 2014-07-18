@@ -127,3 +127,52 @@ ENV NODEJS_VERSION 0.10.22
 RUN wget -O nodejs.tar.gz http://nodejs.org/dist/v$NODEJS_VERSION/node-v$NODEJS_VERSION-linux-x64.tar.gz &&\
     tar C /opt --extract --file nodejs.tar.gz
 ENV PATH /opt/node-v$NODEJS_VERSION-linux-x64/bin:$PATH
+
+# generate postgres ssl and configure
+RUN su - postgres -c "openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=UK/ST=Denial/L=Springfield/O=Dis/CN=salesmaster.co.uk" -keyout /var/lib/postgresql/sm-pg.key  -out /var/lib/postgresql/sm-pg.crt" &&\
+    echo "ssl_cert_file = '/var/lib/postgresql/sm-pg.crt' \n" \
+      "ssl_key_file = '/var/lib/postgresql/sm-pg.key' \n" \
+      "\n" >> /etc/postgresql/$POSTGRES_VERSION/main/postgresql.conf &&\
+    chmod og-rwx /var/lib/postgresql/sm-pg.key
+
+# create runit services:
+RUN \
+    mkdir -p /etc/service/sshd &&\
+    echo "#!/bin/sh \n" \
+      "exec /usr/sbin/sshd -D" > /etc/service/sshd/run &&\
+    \
+    mkdir -p /etc/service/cron &&\
+    echo "#!/bin/sh \n" \
+      "exec /usr/sbin/cron -f" > /etc/service/cron/run &&\
+    \
+    mkdir -p /etc/service/postgres &&\
+    echo "#!/bin/sh \n" \
+      "exec chpst -u postgres -- /usr/lib/postgresql/$POSTGRES_VERSION/bin/postgres -D /var/lib/postgresql/$POSTGRES_VERSION/main -c config_file=/etc/postgresql/$POSTGRES_VERSION/main/postgresql.conf \n" \
+      "\n" > /etc/service/postgres/run &&\
+    \
+    mkdir -p /etc/service/memcached &&\
+    echo "#!/bin/sh \n" \
+      "exec chpst -u memcached -- /opt/memcached/bin/memcached -u memcached -P /var/run/memcached/memcached.pid -m 128 >> /var/log/memcached/memcached.log 2>&1 \n" \
+      "\n" > /etc/service/memcached/run &&\
+    \
+    mkdir -p /etc/service/redis &&\
+    echo "#!/bin/sh \n" \
+      "exec chpst -u redis -- /opt/redis/bin/redis-server /etc/redis/redis.conf \n" \
+      "\n" > /etc/service/redis/run &&\
+    \
+    sed -i '1s/^/daemon off; \n/' /etc/nginx/nginx.conf &&\
+    mkdir -p /etc/service/nginx &&\
+    echo "#!/bin/sh \n" \
+      "exec chpst -u root -- /usr/sbin/nginx \n" \
+      "\n" > /etc/service/nginx/run &&\
+    \
+    mkdir -p /etc/service/solr &&\
+    echo "#!/bin/sh \n" \
+      "cd /opt/solr/example \n" \
+      "exec chpst -u solr -- /usr/bin/java -Dsolr.solr.home=/etc/solr/ -Djetty.logs=/var/log/solr/solr.log -Djetty.home=/etc/solr -Djava.io.tmpdir=/tmp  -Djetty.port=8080 -Xms2048m -Xmx2048m -jar /opt/solr/example/start.jar \n" \
+      "\n" > /etc/service/solr/run &&\
+    \
+    chmod -R +x /etc/service
+
+# run all services
+CMD /usr/sbin/runsvdir-start

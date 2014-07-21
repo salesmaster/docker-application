@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+cat <<\EOF
+
+EXAMPLE container prepare script.
+
+You should overwrite this prepare script to prepare
+a container before the runit services are run.
+
+You could even mount the container_bin dir outside
+the container for easy altering of the init process.
+
+EOF

@@ -77,7 +77,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" > /etc/
     apt-get update &&\
     apt-get install -y --force-yes \
         postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION postgresql-contrib-$POSTGRES_VERSION libpq-dev \
-        postgresql-$POSTGRES_VERSION-repmgr &&\
+        postgresql-$POSTGRES_VERSION-repmgr repmgr &&\
     /etc/init.d/postgresql stop
 
 # install wal-e (pg to s3)
@@ -175,5 +175,11 @@ RUN \
     \
     chmod -R +x /etc/service
 
-# run all services
-CMD /usr/sbin/runsvdir-start
+# Add example container prepare script..
+RUN mkdir /opt/container_bin/
+ADD files/container_prepare /opt/container_bin/container_prepare
+RUN chmod -R +x /opt/container_bin
+ENV PATH /opt/container_bin/:$PATH
+
+# prepare and run all services
+CMD container_prepare && runsvdir-start

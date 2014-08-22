@@ -83,12 +83,12 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" > /etc/
         postgresql-$POSTGRES_VERSION-repmgr repmgr &&\
     /etc/init.d/postgresql stop
 
-# install wal-e (pg to s3)
-RUN easy_install pip &&\
-    easy_install --upgrade pip &&\
-    pip install wal-e &&\
-    easy_install --upgrade wal-e &&\
-    easy_install boto
+## install wal-e (pg to s3)
+#RUN easy_install pip &&\
+#    easy_install --upgrade pip &&\
+#    pip install wal-e &&\
+#    easy_install --upgrade wal-e &&\
+#    easy_install boto
 
 # chruby
 ENV CHRUBY_VERSION 0.3.8

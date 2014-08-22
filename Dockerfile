@@ -11,10 +11,10 @@ ENV DEBIAN_BASE_PACKAGES build-essential autoconf locales ca-certificates \
       curl wget tmux vim git default-jre runit chrpath nginx xvfb iceweasel openssh-server daemontools \
       lzop pv python-setuptools python-all-dev
 
-RUN apt-get update && apt-get upgrade --assume-yes && apt-get dist-upgrade --assume-yes
-RUN apt-get install --assume-yes $DEBIAN_BASE_PACKAGES || apt-get update --fix-missing
-# install same list of base packages (incase first failed)
-RUN apt-get install --assume-yes $DEBIAN_BASE_PACKAGES || echo "no need to install"
+RUN apt-get update && apt-get upgrade --assume-yes && apt-get dist-upgrade --assume-yes && \
+    (apt-get install --assume-yes $DEBIAN_BASE_PACKAGES || apt-get update --fix-missing) && \
+    (apt-get install --assume-yes $DEBIAN_BASE_PACKAGES || echo "no need to install") &&\
+    apt-get clean
 
 # Set timezone + locale
 RUN echo "en_GB.UTF-8 UTF-8" > /etc/locale.gen && locale-gen && dpkg-reconfigure -f noninteractive locales && \
@@ -23,8 +23,8 @@ RUN echo "en_GB.UTF-8 UTF-8" > /etc/locale.gen && locale-gen && dpkg-reconfigure
 
 # configure ssh server
 ADD ./files/sshd_config /etc/ssh/sshd_config
-RUN mkdir /var/run/sshd
-RUN chmod 0755 /var/run/sshd
+RUN mkdir /var/run/sshd &&\
+    chmod 0755 /var/run/sshd
 
 # Base auth details.. should be overridden by sub-container
 RUN echo 'root:lkJh98.443g8yFCHHcppic-9' | chpasswd
@@ -40,6 +40,7 @@ RUN wget -O memcached.tar.gz http://memcached.org/files/memcached-$MEMCACHED_VER
     ./configure --prefix=/opt/memcached &&\
     make && make test && make install &&\
     cd / &&\
+    rm -rf memcached.tar.gz memcached-$MEMCACHED_VERSION &&\
     adduser --system --no-create-home memcached &&\
     mkdir -p /var/run/memcached /var/log/memcached &&\
     chown -R memcached /opt/memcached /var/run/memcached /var/log/memcached
@@ -56,6 +57,7 @@ RUN wget -O redis.tar.gz http://download.redis.io/releases/redis-$REDIS_VERSION.
     cp src/redis-server /opt/redis/bin/ &&\
     cp src/redis-cli /opt/redis/bin/ &&\
     cd / &&\
+    rm -rf redis.tar.gz redis-$REDIS_VERSION &&\
     adduser --system --no-create-home redis &&\
     mkdir -p /var/redis /etc/redis/ /var/run/redis /var/log/redis &&\
     chown -R redis /var/redis /etc/redis/ /var/run/redis /var/log/redis
@@ -65,6 +67,7 @@ ENV PATH /opt/redis/bin/:$PATH
 ENV SOLR_VERSION 3.6.0
 RUN wget -O solr.tar.gz http://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/apache-solr-$SOLR_VERSION.tgz &&\
     tar -C /opt --extract --file solr.tar.gz &&\
+    rm -rf solr.tar.gz &&\
     ln -s /opt/apache-solr-$SOLR_VERSION /opt/solr &&\
     cp -a /opt/solr/example/solr /etc/ &&\
     adduser --system --no-create-home solr &&\
@@ -118,6 +121,7 @@ RUN curl -kL http://install.perlbrew.pl | bash &&\
 ENV PHANTOMJS_VERSION 1.9.7
 RUN wget --no-check-certificate -O phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 &&\
     tar -xjf phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 &&\
+    rm -rf phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 &&\
     mv phantomjs-$PHANTOMJS_VERSION-linux-x86_64 /opt/ &&\
     ln -s /opt/phantomjs-$PHANTOMJS_VERSION-linux-x86_64 /opt/phantomjs
 ENV PATH /opt/phantomjs/bin/:$PATH
@@ -125,7 +129,8 @@ ENV PATH /opt/phantomjs/bin/:$PATH
 # nodejs
 ENV NODEJS_VERSION 0.10.22
 RUN wget -O nodejs.tar.gz http://nodejs.org/dist/v$NODEJS_VERSION/node-v$NODEJS_VERSION-linux-x64.tar.gz &&\
-    tar C /opt --extract --file nodejs.tar.gz
+    tar C /opt --extract --file nodejs.tar.gz &&\
+    rm -rf nodejs.tar.gz
 ENV PATH /opt/node-v$NODEJS_VERSION-linux-x64/bin:$PATH
 
 # generate postgres ssl and configure

@@ -97,7 +97,8 @@ RUN cd chruby-$CHRUBY_VERSION/ &&\
     make install &&\
     cd / &&\
     echo '[ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ] || return' >> /etc/profile.d/chruby.sh &&\
-    echo 'source /usr/local/share/chruby/chruby.sh' >> /etc/profile.d/chruby.sh
+    echo 'source /usr/local/share/chruby/chruby.sh' >> /etc/profile.d/chruby.sh &&\
+    chmod +x /etc/profile.d/chruby.sh
 
 # ruby-install
 ENV RUBYINSTALL_VERSION 0.4.3

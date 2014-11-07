@@ -4,7 +4,7 @@ MAINTAINER bugthing
 
 ENV HOME /root
 ENV DEBIAN_FRONTEND noninteractive
-ENV DEBIAN_BASE_PACKAGES build-essential autoconf locales ca-certificates \
+ENV DEBIAN_BASE_PACKAGES build-essential autoconf locales ca-certificates sudo \
       libyaml-dev  libxml2-dev libssl-dev libreadline6 libreadline6-dev zlib1g zlib1g-dev \
       libevent-dev libsqlite3-dev libxslt1-dev libxml2-dev libssl-dev libfontconfig1-dev \
       bison openssl python-software-properties software-properties-common lsb-release lsb-core \

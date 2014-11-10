@@ -81,6 +81,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" > /etc/
     apt-get install -y --force-yes \
         postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION postgresql-contrib-$POSTGRES_VERSION libpq-dev \
         postgresql-$POSTGRES_VERSION-repmgr repmgr &&\
+    pg_createcluster 9.3 main --start &&\
     /etc/init.d/postgresql stop
 
 ## install wal-e (pg to s3)

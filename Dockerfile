@@ -17,7 +17,7 @@ RUN apt-get update && apt-get upgrade --assume-yes && apt-get dist-upgrade --ass
     apt-get clean
 
 # Set timezone + locale
-RUN echo "en_GB.UTF-8 UTF-8" > /etc/locale.gen && locale-gen && dpkg-reconfigure -f noninteractive locales && \
+RUN echo -e 'en_GB.UTF-8 UTF-8\nen_US.UTF-8 UTF-8' > /etc/locale.gen && locale-gen && dpkg-reconfigure -f noninteractive locales && \
     echo "LANG=en_GB.UTF-8" > /etc/default/locale && \
     echo "Europe/London" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata
 

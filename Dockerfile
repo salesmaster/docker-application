@@ -1,6 +1,6 @@
 FROM debian:wheezy
 
-MAINTAINER bugthing
+MAINTAINER salesmaster
 
 ENV HOME /root
 ENV DEBIAN_FRONTEND noninteractive

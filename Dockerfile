@@ -65,10 +65,10 @@ ENV PATH /opt/redis/bin/:$PATH
 
 # solr
 ENV SOLR_VERSION 4.2.0
-RUN wget -O solr.tar.gz http://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/apache-solr-$SOLR_VERSION.tgz &&\
+RUN wget -O solr.tar.gz http://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz &&\
     tar -C /opt --extract --file solr.tar.gz &&\
     rm -rf solr.tar.gz &&\
-    ln -s /opt/apache-solr-$SOLR_VERSION /opt/solr &&\
+    ln -s /opt/solr-$SOLR_VERSION /opt/solr &&\
     cp -a /opt/solr/example/solr /etc/ &&\
     adduser --system --no-create-home solr &&\
     mkdir -p /var/lib/solr/staging/data/index /var/lib/solr /var/run/solr /var/log/solr &&\

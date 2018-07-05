@@ -1,13 +1,13 @@
-FROM debian:wheezy
+FROM debian:stretch
 
 MAINTAINER salesmaster
 
 ENV HOME /root
 ENV DEBIAN_FRONTEND noninteractive
 ENV DEBIAN_BASE_PACKAGES build-essential autoconf locales ca-certificates sudo \
-      libyaml-dev  libxml2-dev libssl-dev libreadline6 libreadline6-dev zlib1g zlib1g-dev \
-      libevent-dev libsqlite3-dev libxslt1-dev libxml2-dev libssl-dev libfontconfig1-dev \
-      bison openssl python-software-properties software-properties-common lsb-release lsb-core \
+      libyaml-dev  libxml2-dev libssl1.0-dev libreadline7 libreadline-dev zlib1g zlib1g-dev \
+      libevent-dev libsqlite3-dev libxslt1-dev libxml2-dev libfontconfig1-dev \
+      bison openssl python3-software-properties software-properties-common lsb-release lsb-core \
       curl wget tmux vim git default-jre runit chrpath nginx xvfb iceweasel openssh-server daemontools \
       lzop pv python-setuptools python-all-dev
 
@@ -76,7 +76,8 @@ RUN wget -O solr.tar.gz http://archive.apache.org/dist/lucene/solr/$SOLR_VERSION
 
 # postgres and repmgr
 ENV POSTGRES_VERSION 9.3
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" > /etc/apt/sources.list.d/pgdg.list &&\
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc/apt/sources.list.d/pgdg.list &&\
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - &&\
     apt-get update &&\
     apt-get install -y --force-yes \
         postgresql-$POSTGRES_VERSION postgresql-client-$POSTGRES_VERSION postgresql-contrib-$POSTGRES_VERSION libpq-dev \
@@ -186,6 +187,9 @@ RUN mkdir /opt/container_bin/
 ADD files/container_prepare /opt/container_bin/container_prepare
 RUN chmod -R +x /opt/container_bin
 ENV PATH /opt/container_bin/:$PATH
+
+# Set up runsvdir-start
+RUN ln -s /etc/runit/2 /sbin/runsvdir-start
 
 # prepare and run all services
 CMD container_prepare && runsvdir-start

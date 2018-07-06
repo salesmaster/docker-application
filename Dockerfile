@@ -32,20 +32,6 @@ ADD ./files/docker-debian-wheezy-base_id_rsa /root/.ssh/docker-debian-wheezy-bas
 ADD ./files/docker-debian-wheezy-base_id_rsa.pub /root/.ssh/docker-debian-wheezy-base_id_rsa.pub
 RUN cat /root/.ssh/docker-debian-wheezy-base_id_rsa.pub > /root/.ssh/authorized_keys
 
-# memcache
-ENV MEMCACHED_VERSION 1.4.20
-RUN wget -O memcached.tar.gz http://memcached.org/files/memcached-$MEMCACHED_VERSION.tar.gz &&\
-    tar -zxvf memcached.tar.gz &&\
-    cd memcached-$MEMCACHED_VERSION/ &&\
-    ./configure --prefix=/opt/memcached &&\
-    make && make test && make install &&\
-    cd / &&\
-    rm -rf memcached.tar.gz memcached-$MEMCACHED_VERSION &&\
-    adduser --system --no-create-home memcached &&\
-    mkdir -p /var/run/memcached /var/log/memcached &&\
-    chown -R memcached /opt/memcached /var/run/memcached /var/log/memcached
-ENV PATH /opt/memcached/bin/:$PATH
-
 # redis
 ENV REDIS_VERSION 2.8.12
 ADD files/redis.conf /etc/redis/redis.conf
@@ -157,11 +143,6 @@ RUN \
     echo "#!/bin/sh \n" \
       "exec chpst -u postgres -- /usr/lib/postgresql/$POSTGRES_VERSION/bin/postgres -c config_file=/etc/postgresql/$POSTGRES_VERSION/main/postgresql.conf \n" \
       "\n" > /etc/service/postgres/run &&\
-    \
-    mkdir -p /etc/service/memcached &&\
-    echo "#!/bin/sh \n" \
-      "exec chpst -u memcached -- /opt/memcached/bin/memcached -u memcached -P /var/run/memcached/memcached.pid -m 128 >> /var/log/memcached/memcached.log 2>&1 \n" \
-      "\n" > /etc/service/memcached/run &&\
     \
     mkdir -p /etc/service/redis &&\
     echo "#!/bin/sh \n" \

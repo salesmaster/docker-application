@@ -78,7 +78,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc
 #    easy_install boto
 
 # chruby
-ENV CHRUBY_VERSION 0.3.8
+ENV CHRUBY_VERSION 0.3.9
 RUN wget -O chruby-$CHRUBY_VERSION.tar.gz https://github.com/postmodern/chruby/archive/v$CHRUBY_VERSION.tar.gz && tar -xzvf chruby-$CHRUBY_VERSION.tar.gz
 RUN cd chruby-$CHRUBY_VERSION/ &&\
     make install &&\
